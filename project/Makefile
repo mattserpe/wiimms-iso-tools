@@ -303,7 +303,11 @@ CFLAGS		+= -Wall -Wno-parentheses -Wno-unused-function
 CFLAGS		+= -O3 -Isrc/libwbfs -Isrc -I$(UI) -I. -Iwork
 
 ifeq ($(SYSTEM_LINUX),1)
-  LIBS		+= -ltinfo
+  ifeq ($(shell echo "int main(){}" | gcc -x c - -ltinfo -o /dev/null 2>/dev/null && echo yes || echo no),yes)
+    LIBS    += -ltinfo  # Use -ltinfo if available
+  else
+    LIBS    += -lncurses  # Fallback to -lncurses if -ltinfo is not available
+  endif
   CFLAGS	+= -Wno-format-truncation
 endif
 

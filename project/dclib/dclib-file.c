@@ -427,8 +427,14 @@ void ClosePagerFile()
 {
     if (pager_file)
     {
-	if ( stdout == pager_file ) stdout = 0;
-	if ( stderr == pager_file ) stderr = 0;
+	if ( stdout == pager_file ) {
+		fflush(stdout);
+		freopen(NULL, "w", stdout);
+	}
+	if ( stderr == pager_file ) {
+		fflush(stderr);
+		freopen(NULL, "w", stderr);
+	}
 	if ( stdwrn == pager_file ) stdwrn = 0;
 	if ( stdlog == pager_file ) stdlog = 0;
 	pclose(pager_file);
@@ -444,10 +450,11 @@ bool StdoutToPager()
     if (f)
     {
 	fflush(stdout);
-	stdout = f;
+	freopen(NULL, "w", f);
 
 	if ( stderr && isatty(fileno(stderr)) )
-	    stderr = f;
+		fflush(stderr);
+		freopen(NULL, "w", f);
 
 	if ( stdwrn && isatty(fileno(stdwrn)) )
 	    stdwrn = f;

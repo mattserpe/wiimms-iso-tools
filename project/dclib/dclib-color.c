@@ -5269,8 +5269,17 @@ void RestoreStdFiles ( SavedStdFiles_t *ssf )
 {
     DASSERT(ssf);
 
-    stdout = ssf->std_out;
-    stderr = ssf->std_err;
+    if (ssf->std_out)
+    {
+        fflush(stdout);
+        freopen(NULL, "w", ssf->std_out);
+    }
+
+    if (ssf->std_err)
+    {
+        fflush(stderr);
+        freopen(NULL, "w", ssf->std_err);
+    }
     stdlog = ssf->std_log;
     stdmsg = ssf->std_msg;
     stdwrn = ssf->std_wrn;
@@ -5298,19 +5307,23 @@ void RedirectStdFiles
     if (ssf)
 	SaveStdFiles(ssf);
 
-    stdout = stdwrn = stdmsg = f;
+	fflush(stdout);
+    freopen(NULL, "w", f);
+
+    stdwrn = stdmsg = f;
     colout = colwrn = colmsg = colset ? colset : GetFileColorSet(f);
 
     // special handling for stdlog
     if (stdlog)
     {
-	stdlog = stdout;
+	stdlog = f;
 	collog = colout;
     }
 
     if (err_too)
     {
-	stderr = stdout;
+	fflush(stderr);
+	freopen(NULL, "w", f);
 	colerr = colout;
     }
 }
